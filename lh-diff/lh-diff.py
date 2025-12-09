@@ -2,11 +2,28 @@ import re
 import difflib
 import Levenshtein
 import numpy as np 
+from simhash import Simhash
 
 def normalize_file(path): # remove whitespace and convert to lowercase
     lines = open(path, "r").readlines()
     return [re.sub(r'\s+', ' ', l).strip().lower() for l in lines]
     
+def simhash_pairs(candidates, k=15): # k = 15 from project slides
+    l_candidates, r_candidates = candidates
+    
+    res = []
+    for li, l_cand in l_candidates:
+        l_hash = Simhash(l_cand)
+
+        r_dists = sorted([ # (cand, dist) pairs
+            ((ri, r_cand), l_hash.distance(Simhash(r_cand))) for ri, r_cand in r_candidates
+        ], key=lambda x: x[1]) # sort ascending, as lower = closer
+            
+        for r_cand, dist in r_dists[:k]:
+            res.append(((li, l_cand), r_cand))
+        
+    return res
+            
 def cosine_similarity(context1, context2):
     # get word frequency for each context
     context1_words = " ".join(context1).lower().split()
@@ -35,13 +52,17 @@ if __name__ == "__main__":
             "./datasets/provided/asdf_2.java"
         ],
         # [
-        #     "../datasets/provided/BaseTypes_1.java", 
-        #     "../datasets/provided/BaseTypes_2.java",
-        #     "../datasets/provided/BaseTypes_3.java",
-        #     "../datasets/provided/BaseTypes_4.java",
-        #     "../datasets/provided/BaseTypes_5.java",
-        #     "../datasets/provided/BaseTypes_6.java",
-        #     "../datasets/provided/BaseTypes_7.java"
+        #     "./datasets/provided/BaseTypes_1.java", 
+        #     "./datasets/provided/BaseTypes_2.java",
+        #     "./datasets/provided/BaseTypes_3.java",
+        #     "./datasets/provided/BaseTypes_4.java",
+        #     "./datasets/provided/BaseTypes_5.java",
+        #     "./datasets/provided/BaseTypes_6.java",
+        #     "./datasets/provided/BaseTypes_7.java"
+        # ],
+        # [
+        #     "./datasets/provided/DeltaProcessor_1.java",
+        #     "./datasets/provided/DeltaProcessor_2.java"    
         # ]
     ]
 
@@ -65,12 +86,8 @@ if __name__ == "__main__":
                     l += 1
                     r += 1
 
-            # create all pairs
-            # to optimize, we do simhash before levenstein + cosine, but for now we skip
-            candidate_pairs = [
-                (l, r) for l in candidates[0] for r in candidates[1]
-            ]
-            # todo: implement simhash
+            # select top 15 pairs based on simhash
+            candidate_pairs = simhash_pairs(candidates)
 
             # for each candidate pair, we calculate the levenstein distance and cosine similarity
             similarities = []
@@ -94,5 +111,4 @@ if __name__ == "__main__":
                 similarities.append((li + 1, ri + 1, combine_sim))
             
             similarities = sorted(similarities, key=lambda x: x[2], reverse=True)
-            print(similarities)
             
