@@ -3,6 +3,8 @@ import difflib
 import Levenshtein
 import numpy as np 
 from simhash import Simhash
+from lxml import etree as ET
+import os
 
 def normalize_file(path): # remove whitespace and convert to lowercase
     lines = open(path, "r").readlines()
@@ -45,6 +47,26 @@ def cosine_similarity(context1, context2):
 
     return dot / (norm_1 * norm_2)
 
+def write_to_XML(mappings, file, name, output='output/'):
+    root = ET.Element("TEST")
+    root.set("NAME", name)
+    root.set("FILE", file)
+
+    for i, mapping in enumerate(mappings):
+        version = ET.SubElement(root, "VERSION")
+        version.set("NUMBER", str(i + 1))
+        version.set("CHECKED", "TRUE")
+
+        for l, r in mapping:
+            location = ET.SubElement(version, "LOCATION")
+            location.set("ORIG", str(l))
+            location.set("NEW", str(r))
+    
+    tree = ET.ElementTree(root)
+
+    os.makedirs(output, exist_ok=True)
+    tree.write(output + file + ".xml", pretty_print=True)
+
 if __name__ == "__main__":
     dataset = [
         # [
@@ -77,7 +99,10 @@ if __name__ == "__main__":
         pairs = [(i, i+1) for i in range(len(ds) - 1)]
         # TODO : his only checks them all against the first???
 
+        output = [[(i, i) for i in range(1, len(ds[0]) + 1)]]
         for i, j in pairs:
+            mappings, l_matched, r_matched = {}, set(), set()
+
             # generate candidates (lines unique to each side)
             candidates, l, r = ([], []), 1, 1
             for d in differ.compare(ds[i], ds[j]):
@@ -88,12 +113,16 @@ if __name__ == "__main__":
                     candidates[1].append((r, d[2:]))
                     r += 1
                 elif d.startswith(' '):
+                    mappings[l] = r
+                    l_matched.add(l)
+                    r_matched.add(r)
+
                     l += 1
                     r += 1
 
             # select top 15 pairs based on simhash
             candidate_pairs = simhash_pairs(candidates)
-            print([l for l, _ in candidates[0]])
+            
             # for each candidate pair, we calculate the levenstein distance and cosine similarity
             similarities = []
             for l, r in candidate_pairs:
@@ -118,18 +147,24 @@ if __name__ == "__main__":
             similarities = sorted(similarities, key=lambda x: x[2], reverse=True)
             
             # assign mappings greedily based on our scores
-            mappings, threshold = [], 0.7
-            l_matched, r_matched = set(), set()
+            threshold = 0.7
             for l_line, r_line, sim in similarities:
                 if sim < threshold: break # sorted, so all further scores are below threshold
                 if l_line in l_matched or r_line in r_matched: 
                     continue # already matched
 
-                mappings.append((l_line, r_line))
+                mappings[l_line] = r_line
                 l_matched.add(l_line)
                 r_matched.add(r_line)
 
-            for l_line, r_line, sim in similarities[:20]:  # Top 20
-                print(f"{l_line}→{r_line}: {sim:.3f}")
+            # TODO: line splitting (step 5)
 
-            print(sorted(mappings, key=lambda x: x[0]))
+            m = []
+            for i in range(1, len(ds[i]) + 1):
+                m.append((i, mappings.get(i, -1)))
+            for i in [i for i in range(1, len(ds[j]) + 1) if i not in r_matched]:
+                m.append((-1, i))
+
+            output.append(sorted(m, key=lambda x: x[0]))
+        # print(*output[0], sep="\n")
+        write_to_XML(output, 'RefreshLocal', "TEST1")
