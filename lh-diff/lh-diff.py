@@ -5,6 +5,7 @@ import numpy as np
 from simhash import Simhash
 from lxml import etree as ET
 import os
+import glob
 
 def normalize_file(path): # remove whitespace and convert to lowercase
     lines = open(path, "r").readlines()
@@ -47,10 +48,10 @@ def cosine_similarity(context1, context2):
 
     return dot / (norm_1 * norm_2)
 
-def write_to_XML(mappings, file, name, output='output/'):
+def write_mappings_to_XML(mappings, test_name, test_num, output='output/'):
     root = ET.Element("TEST")
-    root.set("NAME", name)
-    root.set("FILE", file)
+    root.set("NAME", "TEST " + str(test_num))
+    root.set("FILE", test_name)
 
     for i, mapping in enumerate(mappings):
         version = ET.SubElement(root, "VERSION")
@@ -65,37 +66,38 @@ def write_to_XML(mappings, file, name, output='output/'):
     tree = ET.ElementTree(root)
 
     os.makedirs(output, exist_ok=True)
-    tree.write(output + file + ".xml", pretty_print=True)
+    tree.write(output + test_name + ".xml", pretty_print=True)
 
 if __name__ == "__main__":
-    dataset = [
-        # [
-        #     "./datasets/provided/asdf_1.java", 
-        #     "./datasets/provided/asdf_2.java"
-        # ],
-        [
-            "./datasets/provided/RefreshLocal_1.java",
-            "./datasets/provided/RefreshLocal_2.java"
-        ],
-        # [
-        #     "./datasets/provided/DeltaProcessor_1.java",
-        #     "./datasets/provided/DeltaProcessor_2.java"    
-        # ],
-        # [
-        #     "./datasets/provided/BaseTypes_1.java", 
-        #     "./datasets/provided/BaseTypes_2.java",
-        #     "./datasets/provided/BaseTypes_3.java",
-        #     "./datasets/provided/BaseTypes_4.java",
-        #     "./datasets/provided/BaseTypes_5.java",
-        #     "./datasets/provided/BaseTypes_6.java",
-        #     "./datasets/provided/BaseTypes_7.java"
-        # ],
+    # provided dataset
+    prov_path = "./datasets/provided/"
+    prov_files = [
+        "asdf", "ASTResolving", "ArrayReference", "BaseTypes",
+        "BuildPathsPropertyPage", "CPListLabelProvider", 
+        "CompilationUnitDocumentProvider", "DeltaProcessor",
+        "DialogCustomize", "DirectoryDialog", "DoubleCache",
+        "FontData", "GC", "GC2", "JavaCodeScanner",
+        "JavaModelManager", "JavaPerspectiveFactory",
+        "PluginSearchScope", "RefreshLocal", "ResourceCompareInput",
+        "ResourceInfo", "SaveManager", "TabFolder"
     ]
 
-    normalized_dataset = [[normalize_file(f) for f in ds] for ds in dataset]
+    prov_dataset = [
+        (i + 1, f, sorted(glob.glob(f"{prov_path}{f}_*")))
+        for i, f in enumerate(prov_files)
+    ]
+
+    # TODO : custom dataset
+
+    # select, prepare, normalize dataset
+    selected_dataset = prov_dataset
+    normalized_dataset = [
+        (test_num, name, [normalize_file(f) for f in ds]) for test_num, name, ds in selected_dataset
+    ]
 
     differ = difflib.Differ()
-    for ds in normalized_dataset:
+    for test_num, name, ds in normalized_dataset:
+        print(f"Processing test {test_num}: {name}")
         pairs = [(i, i+1) for i in range(len(ds) - 1)]
         # TODO : his only checks them all against the first???
 
@@ -166,5 +168,5 @@ if __name__ == "__main__":
                 m.append((-1, i))
 
             output.append(sorted(m, key=lambda x: x[0]))
-        # print(*output[0], sep="\n")
-        write_to_XML(output, 'RefreshLocal', "TEST1")
+            
+        write_mappings_to_XML(output, name, test_num)
