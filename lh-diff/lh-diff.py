@@ -47,10 +47,18 @@ def cosine_similarity(context1, context2):
 
 if __name__ == "__main__":
     dataset = [
+        # [
+        #     "./datasets/provided/asdf_1.java", 
+        #     "./datasets/provided/asdf_2.java"
+        # ],
         [
-            "./datasets/provided/asdf_1.java", 
-            "./datasets/provided/asdf_2.java"
+            "./datasets/provided/RefreshLocal_1.java",
+            "./datasets/provided/RefreshLocal_2.java"
         ],
+        # [
+        #     "./datasets/provided/DeltaProcessor_1.java",
+        #     "./datasets/provided/DeltaProcessor_2.java"    
+        # ],
         # [
         #     "./datasets/provided/BaseTypes_1.java", 
         #     "./datasets/provided/BaseTypes_2.java",
@@ -60,10 +68,6 @@ if __name__ == "__main__":
         #     "./datasets/provided/BaseTypes_6.java",
         #     "./datasets/provided/BaseTypes_7.java"
         # ],
-        # [
-        #     "./datasets/provided/DeltaProcessor_1.java",
-        #     "./datasets/provided/DeltaProcessor_2.java"    
-        # ]
     ]
 
     normalized_dataset = [[normalize_file(f) for f in ds] for ds in dataset]
@@ -71,6 +75,7 @@ if __name__ == "__main__":
     differ = difflib.Differ()
     for ds in normalized_dataset:
         pairs = [(i, i+1) for i in range(len(ds) - 1)]
+        # TODO : his only checks them all against the first???
 
         for i, j in pairs:
             # generate candidates (lines unique to each side)
@@ -88,7 +93,7 @@ if __name__ == "__main__":
 
             # select top 15 pairs based on simhash
             candidate_pairs = simhash_pairs(candidates)
-
+            print([l for l, _ in candidates[0]])
             # for each candidate pair, we calculate the levenstein distance and cosine similarity
             similarities = []
             for l, r in candidate_pairs:
@@ -112,3 +117,19 @@ if __name__ == "__main__":
             
             similarities = sorted(similarities, key=lambda x: x[2], reverse=True)
             
+            # assign mappings greedily based on our scores
+            mappings, threshold = [], 0.7
+            l_matched, r_matched = set(), set()
+            for l_line, r_line, sim in similarities:
+                if sim < threshold: break # sorted, so all further scores are below threshold
+                if l_line in l_matched or r_line in r_matched: 
+                    continue # already matched
+
+                mappings.append((l_line, r_line))
+                l_matched.add(l_line)
+                r_matched.add(r_line)
+
+            for l_line, r_line, sim in similarities[:20]:  # Top 20
+                print(f"{l_line}→{r_line}: {sim:.3f}")
+
+            print(sorted(mappings, key=lambda x: x[0]))
