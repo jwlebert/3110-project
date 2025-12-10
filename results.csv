@@ -1,0 +1,26 @@
+Test File,Accuracy (%),Correct Matches,Total Mappings
+asdf,91.67,11,12
+ASTResolving,91.67,33,36
+ArrayReference,100.00,24,24
+BaseTypes,42.86,30,70
+BuildPathsPropertyPage,96.15,25,26
+CPListLabelProvider,95.83,23,24
+CompilationUnitDocumentProvider,97.06,33,34
+DeltaProcessor,91.67,22,24
+DialogCustomize,100.00,16,16
+DirectoryDialog,100.00,6,6
+DoubleCache,58.33,14,24
+FontData,82.14,23,28
+GC,96.15,25,26
+GC2,100.00,22,22
+JavaCodeScanner,100.00,26,26
+JavaModelManager,100.00,12,12
+JavaPerspectiveFactory,100.00,16,16
+PluginSearchScope,75.00,12,16
+RefreshLocal,100.00,12,12
+ResourceCompareInput,96.67,29,30
+ResourceInfo,92.31,24,26
+SaveManager,63.64,7,11
+TabFolder,70.83,17,24
+
+TOTAL / AVERAGE,84.77,462,545
