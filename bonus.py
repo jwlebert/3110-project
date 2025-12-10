@@ -71,15 +71,19 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         repo_path = sys.argv[1]
         
-        # Find commits with "fix" in the message
-        print(f"Searching for commits with 'fix' in message...\n")
+        # Find commits that look like bug fixes
+        fix_patterns = ['fix ', 'fix:', 'fix(', 'fixes ', 'fixed ', 'fixing ',
+                        'bug ', 'bug:', 'closes #', 'close #', 'resolves #', 'resolve #']
+        
+        print(f"Searching for bug-fix commits...\n")
         fix_commits = []
         for commit in Repository(repo_path).traverse_commits():
-            if 'fix' in commit.msg.lower():
+            msg_lower = commit.msg.lower()
+            if any(pattern in msg_lower for pattern in fix_patterns):
                 fix_commits.append(commit)
         
         if not fix_commits:
-            print("No commits found with 'fix' in the message.")
+            print("No bug-fix commits found.")
             sys.exit(1)
         
         # Show first 5 fix commits and ask user to choose
