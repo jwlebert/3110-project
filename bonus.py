@@ -26,7 +26,7 @@ def szz(repo_path, fix_commit_hash):
                 print(f"  - No lines deleted in {modified_file.filename}, skipping.")
                 continue
 
-            # 3. Run Git Blame on the PREVIOUS version (Parent of Fix) (commit.hash^ means parent)
+            # run Git Blame on the PREVIOUS version (Parent of Fix) (commit.hash^ means parent)
             parent_hash = f"{commit.hash}^"
             
             # Blame specific lines (-L) in the parent revision
@@ -49,7 +49,7 @@ def szz(repo_path, fix_commit_hash):
                         cwd=repo_path
                     )
                     
-                    # 4. Parse the output to find the original committer
+                    # parse the output to find the original committer
                     if result.returncode != 0:
                         print(f"  ! Blame failed for line {line_num} in {modified_file.filename}: {result.stderr.strip()}")
                         continue
@@ -86,16 +86,17 @@ if __name__ == "__main__":
             print("No bug-fix commits found.")
             sys.exit(1)
         
-        # Show first 5 fix commits and ask user to choose
-        print("Found fix commits:")
-        for i, commit in enumerate(fix_commits[:5]):
+        # Show 5 most recent fix commits and ask user to choose
+        recent_fixes = fix_commits[-5:][::-1]  # Most recent first
+        print("Found fix commits (most recent first):")
+        for i, commit in enumerate(recent_fixes):
             print(f"{i+1}. {commit.hash[:8]} - {commit.msg}")
         
-        choice = input(f"\nEnter commit number (1-{min(5, len(fix_commits))}): ").strip()
+        choice = input(f"\nEnter commit number (1-{len(recent_fixes)}): ").strip()
         try:
             idx = int(choice) - 1
-            if 0 <= idx < min(5, len(fix_commits)):
-                fix_commit = fix_commits[idx].hash
+            if 0 <= idx < len(recent_fixes):
+                fix_commit = recent_fixes[idx].hash
                 print(f"\nRunning SZZ on commit: {fix_commit}\n")
                 szz(repo_path, fix_commit)
             else:
