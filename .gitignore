@@ -1,1 +1,11 @@
+# local
+instructions.pptx
+
+# Virtual environment
+.venv/
+
+# Python
 __pycache__/
+
+# Output
+output/
