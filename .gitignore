@@ -1,0 +1,8 @@
+# local
+instructions.pptx
+
+# Virtual environment
+.venv/
+
+# Output
+output/
