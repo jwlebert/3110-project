@@ -58,10 +58,17 @@ def write_mappings_to_XML(mappings, test_name, test_num, output='output/'):
         version.set("NUMBER", str(i + 1))
         version.set("CHECKED", "TRUE")
 
-        for l, r in mapping:
+        for l, rs_ in mapping:
+            rs = rs_.copy()
+            r = rs.pop()
             location = ET.SubElement(version, "LOCATION")
             location.set("ORIG", str(l))
             location.set("NEW", str(r))
+
+            while len(rs):
+                r = rs.pop()
+                alt = ET.SubElement(location, "ALT")
+                alt.set("NEW", str(r))
     
     tree = ET.ElementTree(root)
 
@@ -101,7 +108,7 @@ if __name__ == "__main__":
         pairs = [(i, i+1) for i in range(len(ds) - 1)]
         # TODO : his only checks them all against the first???
 
-        output = [[(i, i) for i in range(1, len(ds[0]) + 1)]]
+        output = [[(i, [i]) for i in range(1, len(ds[0]) + 1)]]
         for i, j in pairs:
             mappings, l_matched, r_matched = {}, set(), set()
 
@@ -149,23 +156,52 @@ if __name__ == "__main__":
             similarities = sorted(similarities, key=lambda x: x[2], reverse=True)
             
             # assign mappings greedily based on our scores
-            threshold = 0.7
+            threshold = 0.5
             for l_line, r_line, sim in similarities:
                 if sim < threshold: break # sorted, so all further scores are below threshold
                 if l_line in l_matched or r_line in r_matched: 
                     continue # already matched
 
-                mappings[l_line] = r_line
                 l_matched.add(l_line)
                 r_matched.add(r_line)
 
-            # TODO: line splitting (step 5)
+                r_lines = [r_line]
+                while True:
+                    strs_no_change = [ds[j][l] for l in range(r_lines[0] - 1, r_lines[-1])]
+                    strs_backward, strs_forward = None, None
+                    if r_lines[-1] < len(ds[j]) and r_lines[-1] + 1 not in r_matched:
+                        strs_forward = [ds[j][l] for l in range(r_lines[0] - 1, r_lines[-1] + 1)]
+                    if r_lines[0] > 1 and r_lines[0] - 1 not in r_matched:
+                        strs_backward = [ds[j][l] for l in range(r_lines[0] - 2, r_lines[-1])]
+
+                    # calculate ratios for no move, forward, and backward
+                    ratios = [
+                        Levenshtein.ratio(ds[i][l_line - 1], " ".join(strs_no_change)),
+                        Levenshtein.ratio(ds[i][l_line - 1], " ".join(strs_backward))
+                            if strs_backward is not None else 0,
+                        Levenshtein.ratio(ds[i][l_line - 1], " ".join(strs_forward))
+                            if strs_forward is not None else 0,
+                    ]
+
+                    # if adding forwards or backwards improves, do it
+                    if max(ratios) == ratios[0]:
+                        break
+                    elif max(ratios) == ratios[1]:
+                        r_lines.insert(0, r_lines[0] - 1)
+                        r_matched.add(r_lines[0])
+                    elif max(ratios) == ratios[2]:
+                        r_lines.append(r_lines[-1] + 1)
+                        r_matched.add(r_lines[-1])
+
+                mappings[l_line] = r_lines
 
             m = []
             for i in range(1, len(ds[i]) + 1):
-                m.append((i, mappings.get(i, -1)))
+                r = mappings.get(i, -1)
+                if not isinstance(r, list): r = [r]
+                m.append((i, r))
             for i in [i for i in range(1, len(ds[j]) + 1) if i not in r_matched]:
-                m.append((-1, i))
+                m.append((-1, [i]))
 
             output.append(sorted(m, key=lambda x: x[0]))
             
