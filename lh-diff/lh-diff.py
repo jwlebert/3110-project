@@ -156,7 +156,7 @@ if __name__ == "__main__":
             similarities = sorted(similarities, key=lambda x: x[2], reverse=True)
             
             # assign mappings greedily based on our scores
-            threshold = 0.5
+            threshold = 0.6
             for l_line, r_line, sim in similarities:
                 if sim < threshold: break # sorted, so all further scores are below threshold
                 if l_line in l_matched or r_line in r_matched: 
