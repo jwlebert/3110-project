@@ -1,4 +1,4 @@
-<TEST NAME="TEST3" FILE"SocketServerConfigs.java">
+<TEST NAME="TEST3" FILE="SocketServerConfigs.java">
   <VERSION NUMBER="1" CHECKED="TRUE">
     <LOCATION ORIG="24" NEW="24"/>
     <LOCATION ORIG="25" NEW="25"/>

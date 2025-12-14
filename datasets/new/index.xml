@@ -1,4 +1,4 @@
-<TEST NAME="TEST1" FILE"index.html">
+<TEST NAME="TEST1" FILE="index.html">
   <VERSION NUMBER="1" CHECKED="TRUE">
     <LOCATION ORIG="1" NEW="1"/>
     <LOCATION ORIG="2" NEW="2"/>
