@@ -1,4 +1,4 @@
-<TEST NAME="TEST25" FILE="arithmetic.c">
+<TEST NAME="TEST9" FILE="AnnotationOutput.c">
   <VERSION NUMBER="1" CHECKED="TRUE">
     <LOCATION ORIG="78" NEW="78"/>
     <LOCATION ORIG="254" NEW="254"/>
