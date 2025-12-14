@@ -24,8 +24,9 @@ Output goes to `output/` as XML files.
 ├── lh-diff/
 │   └── lh-diff.py      # LHDiff implementation
 ├── datasets/
-│   └── provided/       # Test datasets + ground truth
-│   └── custom/         # add new datasets here...
+│   └── provided/       # Test dataset + ground truth
+│   └── new/            # Our dataset
+│   └── custom/         # add new dataset here...
 ├── output/             # Generated XML mappings
 └── requirements.txt
 ```

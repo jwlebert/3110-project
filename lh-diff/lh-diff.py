@@ -94,7 +94,25 @@ if __name__ == "__main__":
         for i, f in enumerate(prov_files)
     ]
 
-    # TODO : custom dataset
+    # custom dataset
+    new_path = "./datasets/new/"
+    new_files = [
+        "AbstractWalletLiveData", "AnnotationOutput", "ApiDocsConfiguration",
+        "CheckForUpdatesTask", "ChromeJavaRunner", "ConceptAprilTag",
+        "CoreProtect", "Date", "DiscordRichPresence", "EmailValidator",
+        "GamePanel", "GeckoLibConstants", "GenerateJsonSchemaTask",
+        "IpcCommunicator", "Makefile", "MyUnitTest", "SocketServerConfigs",
+        "SystemWideAlert", "TagInfoUtil", "UMLAnnotationListDiff",
+        "arithmetic", "index", "s3_rate_limiter", "style", "ttylog"
+    ]
+
+    new_dataset = [
+        (i + 1, f, sorted(glob.glob(f"{new_path}{f}_*")))
+        for i, f in enumerate(new_files)
+    ]
+
+	# if you want to add dataset, can implement here
+	# ... copy the above with your own files
 
     # select, prepare, normalize dataset
     selected_dataset = prov_dataset
