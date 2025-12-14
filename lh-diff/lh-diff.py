@@ -124,7 +124,12 @@ if __name__ == "__main__":
     for test_num, name, ds in normalized_dataset:
         print(f"Processing test {test_num}: {name}")
         pairs = [(i, i+1) for i in range(len(ds) - 1)]
-        # TODO : his only checks them all against the first???
+        # NOTE: his checks 1 - 2, 1 - 3, 1 - 4, etc.
+		# 		to me, this makes no sense. since with diff, you check against previous
+		#		so I just did it like that (e.g., 1 - 2, 2 - 3, 3 - 4, etc.)
+		#
+		#		he also only had one actualy test case with more than one file,
+		#		so I assume it was a mistake?
 
         output = [[(i, [i]) for i in range(1, len(ds[0]) + 1)]]
         for i, j in pairs:
