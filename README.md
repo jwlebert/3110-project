@@ -57,3 +57,20 @@ custom_dataset = [
 ```
 
 3. Set `selected_dataset = custom_dataset`
+
+## Bonus: Bug-Introducing Change Detection
+
+Uses the SZZ algorithm to identify which commits introduced bugs that were later fixed.
+
+### Run
+
+```bash
+python3 bonus/bonus.py /path/to/git/repo
+```
+
+### How it works
+
+1. Scans commit messages for bug-fix patterns (`fix`, `bug`, `closes #`, etc.)
+2. Shows recent fix commits and lets you choose one
+3. Uses `git blame` to trace deleted/modified lines back to their original commit
+4. Reports which commits introduced the buggy code
