@@ -1,4 +1,4 @@
-<TEST NAME="TEST2" FILE"style.css">
+<TEST NAME="TEST2" FILE="style.css">
   <VERSION NUMBER="1" CHECKED="TRUE">
     <LOCATION ORIG="8" NEW="8"/>
     <LOCATION ORIG="9" NEW="9"/>
