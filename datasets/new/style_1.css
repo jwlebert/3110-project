@@ -1,0 +1,56 @@
+body {
+  margin: 0;
+  background-color: #0e0e0e;
+  color: #cacaca;
+  font-family: 'Consolas';
+}
+
+#nopoint {
+  list-style: none;
+  padding-left: 0;
+}
+
+.quote {
+  background-color: #1a1a1a;
+  padding: 10px;
+  display: inline-block
+}
+
+.bar {
+  background-color: #1a1a1a;
+  border-width: 2px;
+  width: 20%;
+}
+
+.container {
+  padding: 0px 25px;
+}
+
+a {
+  text-decoration: none;
+  color: #98e7e3;
+}
+
+nav {
+  display: flex;
+  justify-content: space-evenly;
+  font-size: 17px;
+  top: 0;
+  left: 0;
+  background-color: #20252b;
+  overflow: hidden;
+  list-style-type: none;
+}
+
+nav ul{
+  margin: 0;
+  padding: 10px 20px;
+}
+
+nav li {
+  display: inline;
+}
+
+nav li a {
+  padding: 10px;
+}
